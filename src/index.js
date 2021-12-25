@@ -1,5 +1,5 @@
 import express from "express";
-import { v4 } from "uuid";
+import { v4 as uuidv4 } from "uuid";
 
 const app = express();
 
@@ -7,20 +7,22 @@ app.use(express.json())
 
 let customers = []
 
-app.get('/account', (request, response) => {
-
-    return response.json({ customers })
-})
-
-
 app.post('/account', (request, response) => {
 
     const { cpf, name } = request.body;
 
+    const customerAlreadyExists = customers.some((customer) => customer.cpf === cpf)
+
+    if (customerAlreadyExists) {
+        return response.status(400).json({
+            error: "Customer already exists!"
+        })
+    }
+
     customers.push({
         cpf,
         name,
-        id: v4(),
+        id: uuidv4(),
         statement: []
     })
 
