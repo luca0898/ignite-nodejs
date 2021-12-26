@@ -57,9 +57,19 @@ app.post('/account', (request, response) => {
     return response.status(201).send();
 })
 
-app.get('/statement', verifyIfExistsAccountCPF, (request, response) => {
+app.get('/statements', verifyIfExistsAccountCPF, (request, response) => {
 
     return response.json(request.customer.statements)
+})
+
+app.get('/statements/date', verifyIfExistsAccountCPF, (request, response) => {
+    const { customer, query: { date } } = request;
+    const dateFormat = new Date(date + " 00:00");
+
+    const statements = customer.statements.filter(statement => 
+        new Date(statement.created_at).toDateString() === dateFormat.toDateString())
+
+    return response.json(statements)
 })
 
 app.post('/deposit', verifyIfExistsAccountCPF, (request, response) => {
@@ -82,7 +92,7 @@ app.post('/withdraw', verifyIfExistsAccountCPF, (request, response) => {
 
     const balance = getBalance(customer.statements)
 
-    if (balance < amount){
+    if (balance < amount) {
         return response.status(400).json({
             error: "Insufficient funds!"
         })
